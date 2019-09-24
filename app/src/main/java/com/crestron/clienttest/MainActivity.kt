@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
-import android.text.Html
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
@@ -16,27 +15,16 @@ import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.google.gson.internal.LinkedTreeMap
 import com.programmerbox.dragswipe.DragSwipeAdapter
-import io.ktor.client.HttpClient
 import io.ktor.client.features.websocket.DefaultClientWebSocketSession
-import io.ktor.client.features.websocket.WebSockets
-import io.ktor.client.features.websocket.ws
-import io.ktor.http.HttpMethod
-import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.readText
 import io.ktor.http.cio.websocket.send
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.message_info.view.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 
 @Suppress("UNCHECKED_CAST")
 class MainActivity : AppCompatActivity() {
-
-    private val client = HttpClient {
-        install(WebSockets)
-    }
 
     private val listOfMessages = arrayListOf<SendMessage>()
     private lateinit var adapter: ChatAdapter
@@ -69,9 +57,12 @@ class MainActivity : AppCompatActivity() {
         user_list.adapter = userAdapter
 
         GlobalScope.launch {
-            setupChatClient()
+            ClientHandler(object : ClientUISetup {
+                override suspend fun uiSetup(socket: DefaultClientWebSocketSession) {
+                    socket.uiSetup()
+                }
+            })
         }
-
     }
 
     class ChatAdapter(
@@ -80,9 +71,7 @@ class MainActivity : AppCompatActivity() {
     ) : DragSwipeAdapter<SendMessage, ViewHolder>(list) {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            Loged.d("${BBCodeParser().parse(list[position].message)} and before ${list[position].message}")
             holder.tv.text = BBCodeParser().parse(list[position].message)
-            //Picasso.get().load(list[position].user.image).error(R.mipmap.ic_launcher).resize(150, 150).into(holder.image)
             Glide.with(context).load(list[position].user.image).into(holder.image)
         }
 
@@ -129,30 +118,6 @@ class MainActivity : AppCompatActivity() {
         val image = view.avatar!!
     }
 
-    data class ChatUser(
-        var name: String,
-        var image: String = "https://www.w3schools.com/w3images/bandmember.jpg"
-    )
-
-    enum class MessageType {
-        MESSAGE, EPISODE, SERVER, INFO, TYPING_INDICATOR, DOWNLOADING
-    }
-
-    data class SendMessage(
-        val user: ChatUser,
-        val message: String,
-        val type: MessageType?,
-        val data: Any? = null
-    ) {
-        @SuppressLint("SimpleDateFormat")
-        val time = SimpleDateFormat("MM/dd hh:mm a").format(System.currentTimeMillis())!!
-
-        fun toJson(): String = Gson().toJson(this)
-    }
-
-    data class Action(val type: String, val json: String)
-    data class TypingIndicator(val isTyping: Boolean)
-
     private suspend fun DefaultClientWebSocketSession.uiSetup() {
         sendButton.setOnClickListener {
             GlobalScope.launch {
@@ -164,14 +129,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         textToSend.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
-            }
-
+            override fun afterTextChanged(p0: Editable?) {}
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 GlobalScope.launch {
                     val isTyping = !p0.isNullOrBlank() && !p0.startsWith("/pm ")
@@ -184,33 +143,11 @@ class MainActivity : AppCompatActivity() {
                     send(s)
                 }
             }
-
         })
-
-        // Receive frame.
-        incoming.consumeEach {
-            if (it is Frame.Text) {
-                runOnUiThread {
-                    addAndUpdate(
-                        Gson().fromJson(
-                            it.readText(),
-                            SendMessage::class.java
-                        )
-                    )
-                }
+        newMessage {
+            runOnUiThread {
+                addAndUpdate(Gson().fromJson(it.readText(), SendMessage::class.java))
             }
         }
     }
-
-    private suspend fun setupChatClient() {
-        client.ws(
-            method = HttpMethod.Get,
-            host = "192.168.1.128",
-            port = 8080, path = "/chat/ws"
-        ) {
-            // this: DefaultClientWebSocketSession
-            uiSetup()
-        }
-    }
-
 }

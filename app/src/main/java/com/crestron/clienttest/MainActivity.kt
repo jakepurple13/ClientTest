@@ -134,13 +134,7 @@ class MainActivity : AppCompatActivity() {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 GlobalScope.launch {
                     val isTyping = !p0.isNullOrBlank() && !p0.startsWith("/pm ")
-                    val s = Gson().toJson(
-                        Action(
-                            "Typing",
-                            Gson().toJson(TypingIndicator(isTyping))
-                        )
-                    )
-                    send(s)
+                    sendAction(TypingIndicator(isTyping).toAction())
                 }
             }
         })

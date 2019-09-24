@@ -8,7 +8,7 @@ import io.ktor.client.features.websocket.WebSockets
 import io.ktor.client.features.websocket.ws
 import io.ktor.http.HttpMethod
 import io.ktor.http.cio.websocket.Frame
-import io.ktor.http.cio.websocket.readText
+import io.ktor.http.cio.websocket.send
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
@@ -31,6 +31,11 @@ class ClientHandler(clientUISetup: ClientUISetup) {
             }
         }
     }
+
+    fun close() {
+        client.close()
+    }
+
 }
 
 interface ClientUISetup {
@@ -69,4 +74,13 @@ data class SendMessage(
 
 data class Action(val type: String, val json: String)
 data class TypingIndicator(val isTyping: Boolean)
+data class Download(val download: Boolean)
 data class Profile(val username: String?, val image: String?)
+
+fun TypingIndicator.toAction() = Action("Typing", this.toJson())
+fun Profile.toAction() = Action("Profile", this.toJson())
+fun Download.toAction() = Action("Download", this.toJson())
+
+suspend fun DefaultClientWebSocketSession.sendAction(action: Action) = send(action.toJson())
+
+fun Any.toJson(): String = Gson().toJson(this)

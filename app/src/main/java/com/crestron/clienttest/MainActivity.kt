@@ -120,11 +120,13 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun DefaultClientWebSocketSession.uiSetup() {
         sendButton.setOnClickListener {
-            GlobalScope.launch {
-                send(textToSend.text.toString())
-            }
-            runOnUiThread {
-                textToSend.setText("")
+            if(!textToSend.text.isNullOrBlank()) {
+                GlobalScope.launch {
+                    send(textToSend.text.toString())
+                }
+                runOnUiThread {
+                    textToSend.setText("")
+                }
             }
         }
 

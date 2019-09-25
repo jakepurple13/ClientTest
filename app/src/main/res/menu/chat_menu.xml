@@ -12,6 +12,11 @@
         android:title="Help" />
 
     <item
+        android:id="@+id/profileChange"
+        android:icon="@drawable/ic_launcher_background"
+        android:title="Profile" />
+
+    <item
         android:id="@+id/boldText"
         android:icon="@drawable/ic_launcher_background"
         android:title="Bold" />

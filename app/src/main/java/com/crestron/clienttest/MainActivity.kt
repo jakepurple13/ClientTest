@@ -10,7 +10,10 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import android.widget.LinearLayout
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -177,6 +180,49 @@ class MainActivity : AppCompatActivity() {
         setSelection(text.toString().indexOf(textToAdd) + middle)
     }
 
+    fun profileChange(socketSession: DefaultClientWebSocketSession) {
+        val linearLayout = LinearLayout(this@MainActivity)
+        linearLayout.orientation = LinearLayout.VERTICAL
+        val lp = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+
+        val nameInput = EditText(this@MainActivity)
+        nameInput.layoutParams = lp
+        nameInput.hint = "Name"
+        nameInput.imeOptions = EditorInfo.IME_ACTION_NEXT
+
+        val imageInput = EditText(this@MainActivity)
+        imageInput.layoutParams = lp
+        imageInput.hint = "Image Url"
+        imageInput.imeOptions = EditorInfo.IME_ACTION_GO
+
+        linearLayout.addView(nameInput)
+        linearLayout.addView(imageInput)
+
+        val builder = AlertDialog.Builder(this@MainActivity)
+        builder.setView(linearLayout)
+        builder.setTitle("Change your profile info")
+        builder.setMessage("Change your profile info")
+        builder.setCancelable(false)
+        // Add the buttons
+        builder.setPositiveButton("Okay!") { _, _ ->
+            GlobalScope.launch {
+                val name =
+                    if (nameInput.text.toString().isBlank()) null else nameInput.text.toString()
+                val image =
+                    if (imageInput.text.toString().isBlank()) null else imageInput.text.toString()
+                socketSession.sendAction(Profile(name, image).toAction())
+            }
+        }
+        builder.setNegativeButton("Never Mind") { _, _ ->
+
+        }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
     private suspend fun DefaultClientWebSocketSession.uiSetup() {
         sendButton.setOnClickListener {
             if (!textToSend.text.isNullOrBlank()) {
@@ -208,6 +254,9 @@ class MainActivity : AppCompatActivity() {
                         }
                         R.id.shows -> {
                             startActivity(Intent(this@MainActivity, ShowActivity::class.java))
+                        }
+                        R.id.profileChange -> {
+                            profileChange(this@uiSetup)
                         }
                         R.id.boldText -> {
                             textToSend.addText("[b][/b]")

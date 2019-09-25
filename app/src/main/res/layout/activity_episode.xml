@@ -44,6 +44,8 @@
                 android:id="@+id/description_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:autoLink="all"
+                android:linksClickable="true"
                 android:text="Description" />
 
         </ScrollView>

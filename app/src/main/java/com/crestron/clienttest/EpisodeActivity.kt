@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 class EpisodeActivity : AppCompatActivity() {
 
     private val client = HttpClient()
-    lateinit var adapter: EpisodeAdapter
+    private lateinit var adapter: EpisodeAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,8 +60,9 @@ class EpisodeActivity : AppCompatActivity() {
                 port = 8080
             }
             val q = Gson().fromJson<Episode>(s, Episode::class.java)
+            Loged.i(q.EpisodeInfo)
             runOnUiThread {
-                adapter.setListNotify(q.EpisodeInfo.episodeList.toList() as ArrayList<EpListInfo>)
+                adapter.setListNotify(q.EpisodeInfo.episodeList.toMutableList() as ArrayList<EpListInfo>)
                 Glide.with(this@EpisodeActivity).load(q.EpisodeInfo.image).into(cover_image)
                 title_text.text = q.EpisodeInfo.name
                 description_text.text = "${q.EpisodeInfo.url}\n\n${q.EpisodeInfo.description}"
@@ -83,6 +84,7 @@ class EpisodeActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: MainActivity.ViewHolder, position: Int) {
             holder.tv.text = list[position].name
             holder.itemView.setOnClickListener {
+                holder.tv.text = "${list[position].name}\nRetrieving"
                 GlobalScope.launch {
                     val s = HttpClient().get<String>(
                         "/api/video/${list[position].url.replace(
@@ -98,7 +100,6 @@ class EpisodeActivity : AppCompatActivity() {
                     activity.runOnUiThread {
                         val v = Gson().fromJson<VideoLink>(s, VideoLink::class.java)
                         holder.tv.text = "${list[position].name}\n${v.videoLink}"
-                        holder.tv.linksClickable = true
                     }
 
                 }

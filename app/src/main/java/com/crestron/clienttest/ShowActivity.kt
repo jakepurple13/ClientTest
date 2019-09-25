@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +19,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.host
 import io.ktor.client.request.port
 import io.ktor.http.HttpMethod
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_show.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -54,6 +56,18 @@ class ShowActivity : AppCompatActivity() {
         val q = Gson().fromJson<ShowList>(s, ShowList::class.java)
         runOnUiThread {
             adapter.setListNotify(q.shows as ArrayList<EpisodeInfo>)
+            search_text.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(p0: Editable?) {}
+                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+                override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                    adapter.setListNotify(adapter.list.filter {
+                        it.name.contains(
+                            "$p0",
+                            ignoreCase = true
+                        )
+                    } as ArrayList<EpisodeInfo>)
+                }
+            })
         }
     }
 

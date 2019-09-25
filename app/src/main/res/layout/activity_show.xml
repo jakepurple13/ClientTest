@@ -6,10 +6,19 @@
     android:layout_height="match_parent"
     tools:context=".ShowActivity">
 
+    <EditText
+        android:id="@+id/search_text"
+        android:layout_alignParentTop="true"
+        android:hint="Search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:ignore="HardcodedText" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/search_text"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:itemCount="5"

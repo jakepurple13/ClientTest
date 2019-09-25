@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             MessageType.SERVER -> adapter.addItem(sendMessage)
             MessageType.INFO -> userAdapter.setListNotify(sendMessage.data as ArrayList<ChatUser>)
             MessageType.TYPING_INDICATOR -> typing_indicator.text = sendMessage.message
-            MessageType.DOWNLOADING -> ""
+            MessageType.DOWNLOADING -> Loged.i("Download")
             null -> adapter.addItem(sendMessage)
         }
         rv.smoothScrollToPosition(adapter.itemCount)
@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
             .configureEditText {
                 it.hint = "Or leave blank for default"
             }
-            .setInputFilter("Nope") { text -> true }
+            .setInputFilter("Nope") { true }
             .setConfirmButton(
                 "Ok"
             ) { text ->
@@ -144,6 +144,8 @@ class MainActivity : AppCompatActivity() {
             Glide.with(context).load(s["image"] as String).into(holder.image)
             holder.itemView.setOnClickListener {
                 textField.setText("/pm ${s["name"]} ")
+                textField.setSelection(textField.text.toString().length)
+                textField.requestAndShowKeyboard()
             }
         }
 
@@ -163,6 +165,18 @@ class MainActivity : AppCompatActivity() {
         val image = view.avatar!!
     }
 
+    @SuppressLint("SetTextI18n")
+    fun EditText.addText(textToAdd: String, middle: Int = 3) {
+        val cursorPosition = selectionStart
+        val enteredText = text.toString()
+        setText(
+            "${enteredText.substring(0, cursorPosition)}$textToAdd${enteredText.substring(
+                cursorPosition
+            )}"
+        )
+        setSelection(text.toString().indexOf(textToAdd) + middle)
+    }
+
     private suspend fun DefaultClientWebSocketSession.uiSetup() {
         sendButton.setOnClickListener {
             if (!textToSend.text.isNullOrBlank()) {
@@ -177,6 +191,8 @@ class MainActivity : AppCompatActivity() {
 
         val sheet = BottomSheetMenuDialogFragment.Builder(this@MainActivity)
             .setSheet(R.menu.chat_menu)
+            .dark()
+            .grid()
             .setTitle("Help")
             .setListener(object : BottomSheetListener {
                 override fun onSheetItemSelected(
@@ -193,6 +209,33 @@ class MainActivity : AppCompatActivity() {
                         R.id.shows -> {
                             startActivity(Intent(this@MainActivity, ShowActivity::class.java))
                         }
+                        R.id.boldText -> {
+                            textToSend.addText("[b][/b]")
+                        }
+                        R.id.underlineText -> {
+                            textToSend.addText("[u][/u]")
+                        }
+                        R.id.italicText -> {
+                            textToSend.addText("[i][/i]")
+                        }
+                        R.id.colorText -> {
+                            textToSend.addText("[color=][/color]", 8)
+                        }
+                        R.id.bigText -> {
+                            textToSend.addText("[big][/big]", 5)
+                        }
+                        R.id.smallText -> {
+                            textToSend.addText("[small][/small]", 7)
+                        }
+                        R.id.supText -> {
+                            textToSend.addText("[sup][/sup]", 5)
+                        }
+                        R.id.subText -> {
+                            textToSend.addText("[sub][/sub]", 5)
+                        }
+                        R.id.strikethroughText -> {
+                            textToSend.addText("[s][/s]")
+                        }
                     }
                 }
 
@@ -201,7 +244,7 @@ class MainActivity : AppCompatActivity() {
                     `object`: Any?,
                     dismissEvent: Int
                 ) {
-
+                    textToSend.requestAndShowKeyboard()
                 }
 
                 override fun onSheetShown(
@@ -221,8 +264,8 @@ class MainActivity : AppCompatActivity() {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 GlobalScope.launch {
-                    val isTyping = !p0.isNullOrBlank() && !p0.startsWith("/pm ")
-                    sendAction(TypingIndicator(isTyping).toAction())
+                    //val isTyping = !p0.isNullOrBlank() && !p0.startsWith("/pm ")
+                    //sendAction(TypingIndicator(isTyping).toAction())
                 }
             }
         })

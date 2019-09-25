@@ -90,7 +90,7 @@ object Loged {
      *
      * @param msg the message to log
      */
-    fun e(msg: Any?, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
+    fun e(msg: Any? = null, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
         when (showPretty) {
             true -> prettyLog(tag, msg, Log.ERROR, threadName)
             false -> log(tag, msg, Log.ERROR, threadName)
@@ -102,7 +102,7 @@ object Loged {
      *
      * @param msg the message to log
      */
-    fun i(msg: Any?, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
+    fun i(msg: Any? = null, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
         when (showPretty) {
             true -> prettyLog(tag, msg, Log.INFO, threadName)
             false -> log(tag, msg, Log.INFO, threadName)
@@ -114,7 +114,7 @@ object Loged {
      *
      * @param msg the message to log
      */
-    fun a(msg: Any?, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
+    fun a(msg: Any? = null, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
         when (showPretty) {
             true -> prettyLog(tag, msg, Log.ASSERT, threadName)
             false -> log(tag, msg, Log.ASSERT, threadName)
@@ -126,7 +126,7 @@ object Loged {
      *
      * @param msg the message to log
      */
-    fun wtf(msg: Any?, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
+    fun wtf(msg: Any? = null, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
         when (showPretty) {
             true -> prettyLog(tag, msg, Log.ASSERT, threadName)
             false -> log(tag, msg, Log.ASSERT, threadName)
@@ -138,7 +138,7 @@ object Loged {
      *
      * @param msg the message to log
      */
-    fun w(msg: Any?, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
+    fun w(msg: Any? = null, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
         when (showPretty) {
             true -> prettyLog(tag, msg, Log.WARN, threadName)
             false -> log(tag, msg, Log.WARN, threadName)
@@ -150,7 +150,7 @@ object Loged {
      *
      * @param msg the message to log
      */
-    fun d(msg: Any?, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
+    fun d(msg: Any? = null, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
         when (showPretty) {
             true -> prettyLog(tag, msg, Log.DEBUG, threadName)
             false -> log(tag, msg, Log.DEBUG, threadName)
@@ -162,7 +162,7 @@ object Loged {
      *
      * @param msg the message to log
      */
-    fun v(msg: Any?, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
+    fun v(msg: Any? = null, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
         when (showPretty) {
             true -> prettyLog(tag, msg, Log.VERBOSE, threadName)
             false -> log(tag, msg, Log.VERBOSE, threadName)
@@ -174,7 +174,7 @@ object Loged {
      *
      * @param msg the message to log
      */
-    fun r(msg: Any?, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
+    fun r(msg: Any? = null, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
         when (showPretty) {
             true -> prettyLog(tag, msg, LogLevel.random().level, threadName)
             false -> log(tag, msg, LogLevel.random().level, threadName)

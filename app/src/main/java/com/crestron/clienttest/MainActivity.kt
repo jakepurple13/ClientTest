@@ -2,6 +2,7 @@ package com.crestron.clienttest
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,6 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
@@ -22,6 +25,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.message_info.view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import android.view.MenuItem
+import com.kennyc.bottomsheet.BottomSheetListener
+import com.kennyc.bottomsheet.BottomSheetMenuDialogFragment
+
 
 @Suppress("UNCHECKED_CAST")
 class MainActivity : AppCompatActivity() {
@@ -31,6 +38,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var userAdapter: UserAdapter
 
     private fun addAndUpdate(sendMessage: SendMessage) {
+        if (sendMessage.type != MessageType.TYPING_INDICATOR)
+            Loged.i(sendMessage)
 
         when (sendMessage.type) {
             MessageType.MESSAGE -> adapter.addItem(sendMessage)
@@ -53,6 +62,10 @@ class MainActivity : AppCompatActivity() {
         adapter = ChatAdapter(listOfMessages, this)
         rv.adapter = adapter
 
+        val dividerItemDecoration =
+            DividerItemDecoration(rv.context, (rv.layoutManager as LinearLayoutManager).orientation)
+        rv.addItemDecoration(dividerItemDecoration)
+
         userAdapter = UserAdapter(arrayListOf(), this, textToSend)
         user_list.adapter = userAdapter
 
@@ -70,9 +83,19 @@ class MainActivity : AppCompatActivity() {
         private val context: Context
     ) : DragSwipeAdapter<SendMessage, ViewHolder>(list) {
 
+        @SuppressLint("SetTextI18n")
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.tv.text = BBCodeParser().parse(list[position].message)
-            Glide.with(context).load(list[position].user.image).into(holder.image)
+            if (list[position].type == MessageType.EPISODE) {
+                val q = Gson().fromJson(
+                    list[position].data.toString(),
+                    Array<EpisodeInfo>::class.java
+                )[0]
+                holder.tv.text = "${q.name}\n\n${q.description}"
+                Glide.with(context).load(q.image).into(holder.image)
+            } else {
+                holder.tv.text = BBCodeParser().parse(list[position].message)
+                Glide.with(context).load(list[position].user.image).into(holder.image)
+            }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -120,7 +143,7 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun DefaultClientWebSocketSession.uiSetup() {
         sendButton.setOnClickListener {
-            if(!textToSend.text.isNullOrBlank()) {
+            if (!textToSend.text.isNullOrBlank()) {
                 GlobalScope.launch {
                     send(textToSend.text.toString())
                 }
@@ -128,6 +151,47 @@ class MainActivity : AppCompatActivity() {
                     textToSend.setText("")
                 }
             }
+        }
+
+        val sheet = BottomSheetMenuDialogFragment.Builder(this@MainActivity)
+            .setSheet(R.menu.chat_menu)
+            .setTitle("Help")
+            .setListener(object : BottomSheetListener {
+                override fun onSheetItemSelected(
+                    bottomSheet: BottomSheetMenuDialogFragment,
+                    item: MenuItem?,
+                    `object`: Any?
+                ) {
+                    when (item?.itemId) {
+                        R.id.help -> {
+                            GlobalScope.launch {
+                                send("/help")
+                            }
+                        }
+                        R.id.shows -> {
+                            startActivity(Intent(this@MainActivity, ShowActivity::class.java))
+                        }
+                    }
+                }
+
+                override fun onSheetDismissed(
+                    bottomSheet: BottomSheetMenuDialogFragment,
+                    `object`: Any?,
+                    dismissEvent: Int
+                ) {
+
+                }
+
+                override fun onSheetShown(
+                    bottomSheet: BottomSheetMenuDialogFragment,
+                    `object`: Any?
+                ) {
+
+                }
+            })
+
+        helpButton.setOnClickListener {
+            sheet.show(this@MainActivity.supportFragmentManager)
         }
 
         textToSend.addTextChangedListener(object : TextWatcher {

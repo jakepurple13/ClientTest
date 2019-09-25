@@ -11,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/typing_indicator"
-        android:orientation="vertical"
         android:layout_toStartOf="@id/userLayout"
+        android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:itemCount="5"
         tools:listitem="@layout/message_info" />
@@ -29,7 +29,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_toStartOf="@id/sendButton" />
+        android:layout_toStartOf="@id/sendButton"
+        android:hint="Enter message or command (starting from slash /):"
+        tools:ignore="HardcodedText" />
 
     <Button
         android:id="@+id/sendButton"
@@ -37,13 +39,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:text="Send" />
+        android:text="Send"
+        tools:ignore="HardcodedText" />
 
     <RelativeLayout
         android:id="@+id/userLayout"
         android:layout_width="150dp"
-        android:layout_above="@id/sendButton"
         android:layout_height="match_parent"
+        android:layout_above="@id/helpButton"
         android:layout_alignParentEnd="true">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -56,5 +59,14 @@
             tools:listitem="@layout/message_info" />
 
     </RelativeLayout>
+
+    <Button
+        android:id="@+id/helpButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@id/sendButton"
+        android:text="Help"
+        tools:ignore="HardcodedText" />
 
 </RelativeLayout>

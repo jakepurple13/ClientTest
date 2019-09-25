@@ -2,10 +2,11 @@ package com.crestron.clienttest
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -47,7 +48,7 @@ class ShowActivity : AppCompatActivity() {
     private suspend fun getShows() {
         val s = client.get<String>("/api/user/allEpisodes.json") {
             method = HttpMethod.Get
-            host = "192.168.1.128"
+            host = ClientHandler.host
             port = 8080
         }
         val q = Gson().fromJson<ShowList>(s, ShowList::class.java)
@@ -66,7 +67,9 @@ class ShowActivity : AppCompatActivity() {
             holder.tv.text = list[position].name
             Glide.with(context).load(list[position].image).into(holder.image)
             holder.itemView.setOnClickListener {
-                Loged.i(list[position])
+                context.startActivity(Intent(context, EpisodeActivity::class.java).apply {
+                    putExtra("episode_info", list[position].url)
+                })
             }
         }
 

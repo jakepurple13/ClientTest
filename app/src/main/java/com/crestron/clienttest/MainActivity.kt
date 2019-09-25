@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -17,7 +18,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.google.gson.internal.LinkedTreeMap
+import com.kennyc.bottomsheet.BottomSheetListener
+import com.kennyc.bottomsheet.BottomSheetMenuDialogFragment
 import com.programmerbox.dragswipe.DragSwipeAdapter
+import com.yarolegovich.lovelydialog.LovelyTextInputDialog
 import io.ktor.client.features.websocket.DefaultClientWebSocketSession
 import io.ktor.http.cio.websocket.readText
 import io.ktor.http.cio.websocket.send
@@ -25,9 +29,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.message_info.view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import android.view.MenuItem
-import com.kennyc.bottomsheet.BottomSheetListener
-import com.kennyc.bottomsheet.BottomSheetMenuDialogFragment
 
 
 @Suppress("UNCHECKED_CAST")
@@ -39,7 +40,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun addAndUpdate(sendMessage: SendMessage) {
         if (sendMessage.type != MessageType.TYPING_INDICATOR)
-            Loged.i(sendMessage)
+            Loged.r(sendMessage)
 
         when (sendMessage.type) {
             MessageType.MESSAGE -> adapter.addItem(sendMessage)
@@ -69,13 +70,28 @@ class MainActivity : AppCompatActivity() {
         userAdapter = UserAdapter(arrayListOf(), this, textToSend)
         user_list.adapter = userAdapter
 
-        GlobalScope.launch {
-            ClientHandler(object : ClientUISetup {
-                override suspend fun uiSetup(socket: DefaultClientWebSocketSession) {
-                    socket.uiSetup()
+        LovelyTextInputDialog(this)
+            .setTitle("Enter host address")
+            .setMessage("Enter host address")
+            .configureEditText {
+                it.hint = "Or leave blank for default"
+            }
+            .setInputFilter("Nope") { text -> true }
+            .setConfirmButton(
+                "Ok"
+            ) { text ->
+                if (!text.isNullOrBlank()) {
+                    ClientHandler.host = text
                 }
-            })
-        }
+                GlobalScope.launch {
+                    ClientHandler(object : ClientUISetup {
+                        override suspend fun uiSetup(socket: DefaultClientWebSocketSession) {
+                            socket.uiSetup()
+                        }
+                    })
+                }
+            }
+            .show()
     }
 
     class ChatAdapter(
@@ -92,6 +108,12 @@ class MainActivity : AppCompatActivity() {
                 )[0]
                 holder.tv.text = "${q.name}\n\n${q.description}"
                 Glide.with(context).load(q.image).into(holder.image)
+                holder.itemView.setOnLongClickListener {
+                    context.startActivity(Intent(context, EpisodeActivity::class.java).apply {
+                        putExtra("episode_info", q.url)
+                    })
+                    true
+                }
             } else {
                 holder.tv.text = BBCodeParser().parse(list[position].message)
                 Glide.with(context).load(list[position].user.image).into(holder.image)

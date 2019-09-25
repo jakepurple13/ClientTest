@@ -14,7 +14,13 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 
+
 class ClientHandler(clientUISetup: ClientUISetup) {
+
+    companion object {
+        var host = "192.168.1.128"
+    }
+
     private val client = HttpClient {
         install(WebSockets)
     }
@@ -23,7 +29,7 @@ class ClientHandler(clientUISetup: ClientUISetup) {
         GlobalScope.launch {
             client.ws(
                 method = HttpMethod.Get,
-                host = "192.168.1.128",
+                host = host,
                 port = 8080, path = "/chat/ws"
             ) {
                 // this: DefaultClientWebSocketSession

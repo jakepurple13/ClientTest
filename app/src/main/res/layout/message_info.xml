@@ -14,6 +14,9 @@
         android:id="@+id/text_message"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@id/avatar"
+        android:autoLink="all"
+        android:linksClickable="true"
+        android:textIsSelectable="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

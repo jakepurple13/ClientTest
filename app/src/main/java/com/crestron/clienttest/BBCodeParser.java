@@ -13,6 +13,7 @@ import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.SubscriptSpan;
 import android.text.style.SuperscriptSpan;
+import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.widget.TextView;
@@ -44,7 +45,7 @@ public class BBCodeParser {
     /**
      * Construct new instance of BBCodeParser
      */
-    public BBCodeParser(){
+    public BBCodeParser() {
 
     }
 
@@ -64,7 +65,7 @@ public class BBCodeParser {
      * @param text The text to parse
      * @return Parsed string
      */
-    public SpannableStringBuilder parse(@NonNull String text){
+    public SpannableStringBuilder parse(@NonNull String text) {
 
         SpannableStringBuilder ssb = new SpannableStringBuilder();
 
@@ -72,7 +73,7 @@ public class BBCodeParser {
 
         try {
             parseInternal(null, 0, 0, ssb);
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.e(TAG, "Unable to parse text!");
             e.printStackTrace();
             return new SpannableStringBuilder(text);
@@ -82,11 +83,11 @@ public class BBCodeParser {
 
     }
 
-    private int parseInternal(@Nullable String parentTag, int level, int pos, SpannableStringBuilder ssb){
+    private int parseInternal(@Nullable String parentTag, int level, int pos, SpannableStringBuilder ssb) {
 
         int new_pos = pos;
         int childNumber = 0;
-        while(new_pos < text.length) {
+        while (new_pos < text.length) {
 
             boolean stop = false;
             while (new_pos < text.length && !stop) {
@@ -94,28 +95,27 @@ public class BBCodeParser {
                     ssb.append(text[new_pos]);
                 new_pos++;
 
-                if(new_pos > text.length) new_pos = text.length;
+                if (new_pos > text.length) new_pos = text.length;
 
 
-
-                if(level < mRecursionLimit)
+                if (level < mRecursionLimit)
                     for (int i = new_pos; i < text.length && !stop && text[i] != '[' && text[i] != ' '; i++)
                         if (text[i] == ']')
                             stop = true;
 
-                if (!stop && text[new_pos-1] == '[')
+                if (!stop && text[new_pos - 1] == '[')
                     ssb.append('[');
 
             }
 
-            if(new_pos >= text.length)
+            if (new_pos >= text.length)
                 return new_pos;
 
             int closeTagPos = findChar(new_pos, ']');
 
             //Process the new tag
             //Check if we have to exit current tag
-            if(text[new_pos] == '/')
+            if (text[new_pos] == '/')
                 return closeTagPos;
 
 
@@ -128,11 +128,11 @@ public class BBCodeParser {
             preDecodeTag(childNumber, parentTag, tag, ssb, length_before);
 
             //Parse tag content
-            int end_pos = parseInternal(tag,level+1, closeTagPos + 1, ssb);
+            int end_pos = parseInternal(tag, level + 1, closeTagPos + 1, ssb);
             int length_after = ssb.length();
 
             //Post decoding
-            postDecodeTag(tag, ssb, length_before , length_after);
+            postDecodeTag(tag, ssb, length_before, length_after);
 
 
             new_pos = end_pos + 1;
@@ -143,11 +143,9 @@ public class BBCodeParser {
     }
 
 
-    private void preDecodeTag(int childNumber, @Nullable String parentTag,
-                              String tag, SpannableStringBuilder ssb, int begin){
+    private void preDecodeTag(int childNumber, @Nullable String parentTag, String tag, SpannableStringBuilder ssb, int begin) {
 
-
-        switch (tag){
+        switch (tag) {
 
 
             case "ul":
@@ -160,8 +158,7 @@ public class BBCodeParser {
 
                 if (Objects.equals(parentTag, "ol")) {
                     ssb.append(String.valueOf(childNumber + 1)).append(". ");
-                }
-                else
+                } else
                     ssb.append("\u2022 ");
                 break;
 
@@ -183,13 +180,17 @@ public class BBCodeParser {
 
         String[] args = null;
 
-        if(tag.contains("=")){
+        if (tag.contains("=")) {
             args = tag.split("=");
             tag = args[0];
         }
 
 
         switch (tag) {
+
+            case "img":
+                span = new URLSpan("https://www.w3schools.com/w3images/bandmember.jpg");
+                break;
 
             case "big":
                 span = new AbsoluteSizeSpan(20, true);
@@ -231,7 +232,7 @@ public class BBCodeParser {
 
             //Color
             case "color":
-                if(args == null){
+                if (args == null) {
                     Log.e(TAG, "Invalid color!");
                     break;
                 }
@@ -280,16 +281,16 @@ public class BBCodeParser {
                 break;
         }
 
-        if(span != null)
+        if (span != null)
             ssb.setSpan(span, begin, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        if(span2 != null)
+        if (span2 != null)
             ssb.setSpan(span2, begin, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
 
-    private int findChar(int start, char c){
+    private int findChar(int start, char c) {
         for (int i = start; i < text.length; i++) {
-            if(text[i] == c)
+            if (text[i] == c)
                 return i;
         }
 

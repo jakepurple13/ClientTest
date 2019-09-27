@@ -174,23 +174,24 @@ object Loged {
      *
      * @param msg the message to log
      */
-    fun r(msg: Any? = null, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME) {
+    fun r(msg: Any? = null, tag: String = TAG, showPretty: Boolean = SHOW_PRETTY, threadName: Boolean = WITH_THREAD_NAME, vararg choices: LogLevel) {
         when (showPretty) {
-            true -> prettyLog(tag, msg, LogLevel.random().level, threadName)
-            false -> log(tag, msg, LogLevel.random().level, threadName)
+            true -> prettyLog(tag, msg, LogLevel.random(*choices), threadName)
+            false -> log(tag, msg, LogLevel.random(*choices), threadName)
         }
     }
+}
 
-    enum class LogLevel(val level: Int) {
-        WARNING(Log.WARN),
-        ASSERT(Log.ASSERT),
-        INFO(Log.INFO),
-        VERBOSE(Log.VERBOSE),
-        ERROR(Log.ERROR),
-        DEBUG(Log.DEBUG);
+enum class LogLevel(val level: Int) {
+    WARNING(Log.WARN),
+    ASSERT(Log.ASSERT),
+    INFO(Log.INFO),
+    VERBOSE(Log.VERBOSE),
+    ERROR(Log.ERROR),
+    DEBUG(Log.DEBUG);
 
-        companion object {
-            fun random() = values().random()
-        }
+    companion object {
+        fun random() = values().random().level
+        fun random(vararg choices: LogLevel) = choices.random().level
     }
 }

@@ -118,7 +118,10 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
             } else {
+                //val processor = BBProcessorFactory.getInstance().create();
+                //Loged.r("Before: ${list[position].message}\n\nAfter: ${processor.process(list[position].message)}")
                 holder.tv.text = BBCodeParser().parse(list[position].message)
+                //holder.tv.text = Html.fromHtml(BBCodeParser().parse(processor.process(list[position].message)).toString())
                 Glide.with(context).load(list[position].user.image).into(holder.image)
             }
         }

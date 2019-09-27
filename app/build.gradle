@@ -64,4 +64,5 @@ dependencies {
     implementation 'com.github.Kennyc1012:BottomSheetMenu:3.0.1'
     implementation 'com.google.android.material:material:+'
     implementation 'com.yarolegovich:lovely-dialog:1.1.0'
+    implementation 'org.kefirsf:kefirbb:1.5'
 }

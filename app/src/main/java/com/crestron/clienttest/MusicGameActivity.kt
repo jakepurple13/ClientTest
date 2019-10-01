@@ -13,7 +13,6 @@ import io.ktor.client.request.*
 import io.ktor.http.HttpMethod
 import kotlinx.android.synthetic.main.activity_music_game.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class MusicGameActivity : AppCompatActivity() {
@@ -47,9 +46,24 @@ class MusicGameActivity : AppCompatActivity() {
 
         getInfo()
 
+        getHighScores()
+
         nextButton.setOnClickListener { nextQuestion() }
         prevButton.setOnClickListener { prevQuestion() }
         doneButton.setOnClickListener { answerCheck() }
+    }
+
+    private fun getHighScores() {
+        GlobalScope.launch {
+            val s = client.get<String>("/music/mobileHighScores.json") {
+                method = HttpMethod.Get
+                host = ClientHandler.host
+                port = 8080
+            }
+            runOnUiThread {
+                highScoreTable.text = s
+            }
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -85,10 +99,10 @@ class MusicGameActivity : AppCompatActivity() {
                 quizQuestions = Gson().fromJson(s, Array<QuizQuestions>::class.java)
                 answerList.clear()
                 runOnUiThread {
-                    setQuestionUp()
                     counter = 0
                     finished = false
                     counterText.text = "$counter/${quizQuestions.size}"
+                    setQuestionUp()
                 }
             }
         }
@@ -153,24 +167,21 @@ class MusicGameActivity : AppCompatActivity() {
         // Add the buttons
         builder.setPositiveButton("Submit Score") { _, _ ->
             GlobalScope.launch {
-                val s = GlobalScope.async {
-                    client.post<String>("/music") {
-                        method = HttpMethod.Post
-                        host = ClientHandler.host
-                        port = 8080
-                        header("Content-type", "application/json")
-                        body = UserInfo(
-                            userInput.text.toString(),
-                            artist,
-                            "$count/${quizQuestions.size}"
-                        ).toJson()
-                    }
+                val s = client.post<String>("/music") {
+                    method = HttpMethod.Post
+                    host = ClientHandler.host
+                    port = 8080
+                    header("Content-type", "application/json")
+                    body = UserInfo(
+                        userInput.text.toString(),
+                        artist,
+                        "$count/${quizQuestions.size}"
+                    ).toJson()
                 }
-                Loged.i(s.await())
-                runOnUiThread {
-                    getInfo()
-                }
+                Loged.i(s)
+                getHighScores()
             }
+            getInfo()
         }
         builder.setNeutralButton("Stop Playing") { _, _ ->
             finish()

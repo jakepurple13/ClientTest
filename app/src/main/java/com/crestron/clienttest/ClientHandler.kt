@@ -30,7 +30,8 @@ class ClientHandler(clientUISetup: ClientUISetup) {
             client.ws(
                 method = HttpMethod.Get,
                 host = host,
-                port = 8080, path = "/chat/ws"
+                port = 8080,
+                path = "/chat/ws"
             ) {
                 // this: DefaultClientWebSocketSession
                 clientUISetup.uiSetup(this)

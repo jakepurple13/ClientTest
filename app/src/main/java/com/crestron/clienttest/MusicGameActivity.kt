@@ -91,6 +91,8 @@ class MusicGameActivity : AppCompatActivity() {
         builder.setPositiveButton("Okay!") { _, _ ->
             GlobalScope.launch {
                 artist = artistInput.text.toString()
+                //THIS WORKS! THIS GETS INFO FROM HEROKU!!!!
+                //val s = client.get<String>("https://arcane-fortress-22748.herokuapp.com/music/music_get_quiz_from=${artistInput.text}.json")
                 val s = client.get<String>("/music/music_get_quiz_from=${artistInput.text}.json") {
                     method = HttpMethod.Get
                     host = ClientHandler.host

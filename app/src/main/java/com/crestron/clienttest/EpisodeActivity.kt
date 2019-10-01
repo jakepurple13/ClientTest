@@ -147,11 +147,10 @@ class EpisodeActivity : AppCompatActivity() {
                         .build()
 
                     val fetch = Fetch.getInstance(fetchConfiguration)
-
                     val location =
-                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).toString() + "/Fun/"
+                        context.getExternalFilesDir(Environment.DIRECTORY_MOVIES).toString() + "/Fun/"
                     val request =
-                        Request(v.videoLink, "$location${getNameFromUrl(v.videoLink)}.mp4")
+                        Request(v.videoLink, "$location${Uri.parse(v.videoLink).lastPathSegment}.mp4")
                     request.addHeader("Accept-Language", "en-US,en;q=0.5")
                     request.addHeader(
                         "User-Agent",
@@ -172,10 +171,6 @@ class EpisodeActivity : AppCompatActivity() {
                 Toast.makeText(context, "Downloading", Toast.LENGTH_SHORT).show()
                 true
             }
-        }
-
-        fun getNameFromUrl(url: String): String? {
-            return Uri.parse(url).lastPathSegment
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainActivity.ViewHolder {

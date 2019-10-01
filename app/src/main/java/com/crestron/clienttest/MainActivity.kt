@@ -1,8 +1,12 @@
 package com.crestron.clienttest
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -15,6 +19,8 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -37,13 +43,41 @@ import kotlinx.coroutines.launch
 @Suppress("UNCHECKED_CAST")
 class MainActivity : AppCompatActivity() {
 
+    private var active = true
+
     private val listOfMessages = arrayListOf<SendMessage>()
     private lateinit var adapter: ChatAdapter
     private lateinit var userAdapter: UserAdapter
 
+    private var clientHandler: ClientHandler? = null
+
     private fun addAndUpdate(sendMessage: SendMessage) {
-        if (sendMessage.type != MessageType.TYPING_INDICATOR)
+        if (sendMessage.type != MessageType.TYPING_INDICATOR) {
             Loged.r(sendMessage)
+        }
+
+        if (!active && (sendMessage.type == MessageType.MESSAGE || sendMessage.type == MessageType.SERVER)) {
+            createNotificationChannel()
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+            }
+            val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
+            val builder = NotificationCompat.Builder(this, "CHANNEL_ID")
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setContentTitle(sendMessage.user.name)
+                .setContentText(BBCodeParser().parse(sendMessage.message))
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(BBCodeParser().parse(sendMessage.message))
+                )
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            with(NotificationManagerCompat.from(this)) {
+                // notificationId is a unique int for each notification that you must define
+                notify(1, builder.build())
+            }
+        }
 
         when (sendMessage.type) {
             MessageType.MESSAGE -> adapter.addItem(sendMessage)
@@ -55,6 +89,23 @@ class MainActivity : AppCompatActivity() {
             null -> adapter.addItem(sendMessage)
         }
         rv.smoothScrollToPosition(adapter.itemCount)
+    }
+
+    private fun createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "getString(R.string.channel_name)"
+            val descriptionText = "getString(R.string.channel_description)"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel("CHANNEL_ID", name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,28 +124,30 @@ class MainActivity : AppCompatActivity() {
         userAdapter = UserAdapter(arrayListOf(), this, textToSend)
         user_list.adapter = userAdapter
 
-        LovelyTextInputDialog(this)
-            .setTitle("Enter host address")
-            .setMessage("Enter host address")
-            .configureEditText {
-                it.hint = "Or leave blank for default"
-            }
-            .setInputFilter("Nope") { true }
-            .setConfirmButton(
-                "Ok"
-            ) { text ->
-                if (!text.isNullOrBlank()) {
-                    ClientHandler.host = text
+        if (clientHandler == null) {
+            LovelyTextInputDialog(this)
+                .setTitle("Enter host address")
+                .setMessage("Enter host address")
+                .configureEditText {
+                    it.hint = "Or leave blank for default"
                 }
-                GlobalScope.launch {
-                    ClientHandler(object : ClientUISetup {
-                        override suspend fun uiSetup(socket: DefaultClientWebSocketSession) {
-                            socket.uiSetup()
-                        }
-                    })
+                .setInputFilter("Nope") { true }
+                .setConfirmButton(
+                    "Ok"
+                ) { text ->
+                    if (!text.isNullOrBlank()) {
+                        ClientHandler.host = text
+                    }
+                    GlobalScope.launch {
+                        clientHandler = ClientHandler(object : ClientUISetup {
+                            override suspend fun uiSetup(socket: DefaultClientWebSocketSession) {
+                                socket.uiSetup()
+                            }
+                        })
+                    }
                 }
-            }
-            .show()
+                .show()
+        }
     }
 
     class ChatAdapter(
@@ -224,6 +277,16 @@ class MainActivity : AppCompatActivity() {
         }
         val dialog = builder.create()
         dialog.show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        active = true
+    }
+
+    override fun onPause() {
+        super.onPause()
+        active = false
     }
 
     private suspend fun DefaultClientWebSocketSession.uiSetup() {

@@ -18,7 +18,9 @@
         <activity android:name=".MusicGameActivity" />
         <activity android:name=".EpisodeActivity" />
         <activity android:name=".ShowActivity" />
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

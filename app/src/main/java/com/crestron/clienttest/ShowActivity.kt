@@ -27,6 +27,7 @@ class ShowActivity : AppCompatActivity() {
 
     private val client = HttpClient()
     private lateinit var adapter: ShowAdapter
+    private lateinit var showList: List<EpisodeInfo>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,13 +55,14 @@ class ShowActivity : AppCompatActivity() {
             port = 8080
         }
         val q = Gson().fromJson<ShowList>(s, ShowList::class.java)
+        showList = q.shows
         runOnUiThread {
-            adapter.setListNotify(q.shows as ArrayList<EpisodeInfo>)
+            adapter.setListNotify(showList as ArrayList<EpisodeInfo>)
             search_text.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(p0: Editable?) {}
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
                 override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                    adapter.setListNotify(adapter.list.filter {
+                    adapter.setListNotify(showList.filter {
                         it.name.contains(
                             "$p0",
                             ignoreCase = true

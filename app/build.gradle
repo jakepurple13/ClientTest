@@ -15,6 +15,10 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+    compileOptions {
+        targetCompatibility = "8"
+        sourceCompatibility = "8"
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -65,4 +69,7 @@ dependencies {
     implementation 'com.google.android.material:material:+'
     implementation 'com.yarolegovich:lovely-dialog:1.1.0'
     implementation 'org.kefirsf:kefirbb:1.5'
+    implementation "androidx.tonyodev.fetch2:xfetch2:3.1.4"
+    implementation "androidx.tonyodev.fetch2okhttp:xfetch2okhttp:3.1.4"
+
 }

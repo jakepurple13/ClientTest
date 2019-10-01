@@ -2,15 +2,25 @@ package com.crestron.clienttest
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.programmerbox.dragswipe.DragSwipeAdapter
+import com.tonyodev.fetch2.Fetch
+import com.tonyodev.fetch2.FetchConfiguration
+import com.tonyodev.fetch2.HttpUrlConnectionDownloader
+import com.tonyodev.fetch2.Request
+import com.tonyodev.fetch2core.Downloader
+import com.tonyodev.fetch2core.Func
+import com.tonyodev.fetch2okhttp.OkHttpDownloader
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.host
@@ -19,6 +29,8 @@ import io.ktor.http.HttpMethod
 import kotlinx.android.synthetic.main.activity_episode.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+
 
 class EpisodeActivity : AppCompatActivity() {
 
@@ -104,6 +116,66 @@ class EpisodeActivity : AppCompatActivity() {
 
                 }
             }
+            holder.itemView.setOnLongClickListener {
+                GlobalScope.launch {
+                    val s = HttpClient().get<String>(
+                        "/api/video/${list[position].url.replace(
+                            "/",
+                            "_"
+                        )}.json"
+                    ) {
+                        method = HttpMethod.Get
+                        host = ClientHandler.host
+                        port = 8080
+                    }
+
+                    Loged.i(s)
+                    val v = Gson().fromJson<VideoLink>(s, VideoLink::class.java)
+                    Loged.d(v.videoLink)
+
+                    val okHttpClient = OkHttpClient.Builder().build()
+
+                    val fetchConfiguration = FetchConfiguration.Builder(context)
+                        .setDownloadConcurrentLimit(1)
+                        .enableAutoStart(true)
+                        .setHttpDownloader(HttpUrlConnectionDownloader(Downloader.FileDownloaderType.PARALLEL))
+                        .setProgressReportingInterval(1000L)
+                        .enableRetryOnNetworkGain(true)
+                        .enableLogging(true)
+                        .setHttpDownloader(OkHttpDownloader(okHttpClient))
+                        .setNotificationManager(CustomFetchNotificationManager(context))
+                        .build()
+
+                    val fetch = Fetch.getInstance(fetchConfiguration)
+
+                    val location =
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).toString() + "/Fun/"
+                    val request =
+                        Request(v.videoLink, "$location${getNameFromUrl(v.videoLink)}.mp4")
+                    request.addHeader("Accept-Language", "en-US,en;q=0.5")
+                    request.addHeader(
+                        "User-Agent",
+                        "\"Mozilla/5.0 (Windows NT 10.0; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0\""
+                    )
+                    request.addHeader(
+                        "Accept",
+                        "text/html,video/mp4,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+                    )
+                    request.addHeader("Referer", "http://thewebsite.com")
+                    request.addHeader("Connection", "keep-alive")
+                    fetch.enqueue(request, Func {
+                        Loged.d("Starting Download")
+                    }, Func {
+                        Loged.e("Something went wrong\n${it.throwable}")
+                    })
+                }
+                Toast.makeText(context, "Downloading", Toast.LENGTH_SHORT).show()
+                true
+            }
+        }
+
+        fun getNameFromUrl(url: String): String? {
+            return Uri.parse(url).lastPathSegment
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainActivity.ViewHolder {

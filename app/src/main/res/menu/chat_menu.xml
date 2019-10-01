@@ -17,6 +17,11 @@
         android:title="Profile" />
 
     <item
+        android:id="@+id/musicGame"
+        android:icon="@drawable/ic_launcher_background"
+        android:title="Music" />
+
+    <item
         android:id="@+id/boldText"
         android:icon="@drawable/ic_launcher_background"
         android:title="Bold" />

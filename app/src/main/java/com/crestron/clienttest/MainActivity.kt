@@ -255,6 +255,9 @@ class MainActivity : AppCompatActivity() {
                                 send("/help")
                             }
                         }
+                        R.id.musicGame -> {
+                            startActivity(Intent(this@MainActivity, MusicGameActivity::class.java))
+                        }
                         R.id.shows -> {
                             startActivity(Intent(this@MainActivity, ShowActivity::class.java))
                         }

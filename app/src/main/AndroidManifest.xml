@@ -19,6 +19,7 @@
         android:theme="@style/AppTheme1">
         <activity android:name=".QuizActivity" />
         <activity android:name=".ShowQuizActivity" />
+        <activity android:name=".MusicQuizActivity" />
         <activity android:name=".MusicGameActivity">
 
             <!--

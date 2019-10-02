@@ -19,6 +19,14 @@ enum class QuizChoiceType {
     TEXT, CHOICES
 }
 
+data class QuizQuestions(
+    val question: String,
+    val choices: List<String>,
+    val correctAnswer: String
+)
+
+data class UserInfo(val name: String, val artist: String, val score: String)
+
 abstract class QuizActivity : AppCompatActivity() {
 
     abstract fun getInfoLink(type: String): String
@@ -68,7 +76,7 @@ abstract class QuizActivity : AppCompatActivity() {
                 doneButton.visibility = if (field) View.VISIBLE else View.GONE
             }
         }
-    private var artist = ""
+    private var quizChoice = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,27 +117,27 @@ abstract class QuizActivity : AppCompatActivity() {
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
 
-        val artistInput: View
+        val choiceInput: View
 
         when (type) {
             QuizChoiceType.TEXT -> {
-                artistInput = EditText(this)
-                artistInput.hint = dialogHintText
-                artistInput.imeOptions = EditorInfo.IME_ACTION_NEXT
+                choiceInput = EditText(this)
+                choiceInput.hint = dialogHintText
+                choiceInput.imeOptions = EditorInfo.IME_ACTION_NEXT
 
             }
             QuizChoiceType.CHOICES -> {
                 if (choices.isEmpty())
                     throw Exception("You don't have any choices!")
-                artistInput = Spinner(this)
-                artistInput.adapter =
+                choiceInput = Spinner(this)
+                choiceInput.adapter =
                     ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, choices)
             }
         }
 
-        artistInput.layoutParams = lp
+        choiceInput.layoutParams = lp
 
-        linearLayout.addView(artistInput)
+        linearLayout.addView(choiceInput)
 
         val builder = AlertDialog.Builder(this)
         builder.setView(linearLayout)
@@ -140,10 +148,10 @@ abstract class QuizActivity : AppCompatActivity() {
         builder.setPositiveButton("Okay!") { _, _ ->
             GlobalScope.launch {
                 val chosen = when (type) {
-                    QuizChoiceType.TEXT -> (artistInput as EditText).text.toString()
-                    QuizChoiceType.CHOICES -> (artistInput as Spinner).adapter.getItem(artistInput.selectedItemPosition)!!.toString()
+                    QuizChoiceType.TEXT -> (choiceInput as EditText).text.toString()
+                    QuizChoiceType.CHOICES -> (choiceInput as Spinner).adapter.getItem(choiceInput.selectedItemPosition)!!.toString()
                 }
-                artist = chosen
+                quizChoice = chosen
                 val choice = getInfoLink(chosen)
                 val s = client.get<String>(choice) {
                     method = HttpMethod.Get
@@ -166,14 +174,6 @@ abstract class QuizActivity : AppCompatActivity() {
         val dialog = builder.create()
         dialog.show()
     }
-
-    data class QuizQuestions(
-        val question: String,
-        val choices: List<String>,
-        val correctAnswer: String
-    )
-
-    data class UserInfo(val name: String, val artist: String, val score: String)
 
     private fun answerCheck() {
         answerChecking()
@@ -233,7 +233,7 @@ abstract class QuizActivity : AppCompatActivity() {
                         header("Content-type", "application/json")
                         body = UserInfo(
                             userInput.text.toString(),
-                            artist,
+                            quizChoice,
                             "$count/${quizQuestions.size}"
                         ).toJson()
                     }
@@ -291,7 +291,7 @@ abstract class QuizActivity : AppCompatActivity() {
             answerSection.check(it.first)
         }
         val question = quizQuestions[counter]
-        snippetText.text = question.question
+        questionText.text = question.question
         answerA.text = "A) ${question.choices[0]}"
         answerB.text = "B) ${question.choices[1]}"
         answerC.text = "C) ${question.choices[2]}"

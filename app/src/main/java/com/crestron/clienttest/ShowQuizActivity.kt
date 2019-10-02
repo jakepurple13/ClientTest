@@ -19,3 +19,21 @@ class ShowQuizActivity : QuizActivity() {
     override fun getInfoLink(type: String): String = "/show/quiz/show_type=$type.json"
 
 }
+
+class MusicQuizActivity : QuizActivity() {
+
+    override val dialogHintText: String = "Artist Name"
+    override val dialogMessage: String = "Choose What Songs Can Be Shown"
+
+    override val postHighScoreLink: String? = "/music"
+    override val highScoreLink: String? = "/music/mobileHighScores.json"
+
+    override var dialogTitle: String = "Choose an Artist/Band"
+
+    override fun onCreated() {
+        titleText = "Music Quiz"
+    }
+
+    override fun getInfoLink(type: String): String = "/music/music_get_quiz_from=$type.json"
+
+}

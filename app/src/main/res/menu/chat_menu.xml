@@ -22,6 +22,11 @@
         android:title="Music" />
 
     <item
+        android:id="@+id/musicGame2"
+        android:icon="@drawable/ic_launcher_background"
+        android:title="Music Quiz V2" />
+
+    <item
         android:id="@+id/showGame"
         android:icon="@drawable/ic_launcher_background"
         android:title="Show Quiz" />

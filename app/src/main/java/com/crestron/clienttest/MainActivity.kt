@@ -318,6 +318,9 @@ class MainActivity : AppCompatActivity() {
                         R.id.musicGame -> {
                             startActivity(Intent(this@MainActivity, MusicGameActivity::class.java))
                         }
+                        R.id.musicGame2 -> {
+                            startActivity(Intent(this@MainActivity, MusicQuizActivity::class.java))
+                        }
                         R.id.showGame -> {
                             startActivity(Intent(this@MainActivity, ShowQuizActivity::class.java))
                         }

@@ -32,29 +32,33 @@
         android:layout_marginTop="5dp"
         app:layout_constraintTop_toBottomOf="@id/snippetText">
 
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/answerA"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="A)" />
+            android:text="A)"
+            app:useMaterialThemeColors="true" />
 
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/answerB"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="B)" />
+            android:text="B)"
+            app:useMaterialThemeColors="true" />
 
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/answerC"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="C)" />
+            android:text="C)"
+            app:useMaterialThemeColors="true" />
 
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/answerD"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="D)" />
+            android:text="D)"
+            app:useMaterialThemeColors="true" />
 
     </RadioGroup>
 

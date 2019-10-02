@@ -21,17 +21,36 @@
         android:id="@+id/typing_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/textToSend"
+        android:layout_above="@id/text_layout"
         tools:text="typing" />
 
-    <EditText
+    <!--<EditText
         android:id="@+id/textToSend"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_toStartOf="@id/sendButton"
         android:hint="Enter message or command (starting from slash /):"
-        tools:ignore="HardcodedText" />
+        tools:ignore="HardcodedText" />-->
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="5dp"
+        android:layout_toStartOf="@id/sendButton"
+        app:counterEnabled="true"
+        app:hintAnimationEnabled="true">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/textToSend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter message or command (starting from slash /):"
+            tools:ignore="HardcodedText" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/sendButton"
@@ -64,8 +83,8 @@
         android:id="@+id/helpButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
         android:layout_above="@id/sendButton"
+        android:layout_alignParentEnd="true"
         android:text="Help"
         tools:ignore="HardcodedText" />
 

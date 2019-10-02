@@ -5,8 +5,8 @@ import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import io.ktor.client.HttpClient
 import io.ktor.client.request.*
@@ -29,7 +29,6 @@ data class UserInfo(val name: String, val artist: String, val score: String)
 
 abstract class QuizActivity : AppCompatActivity() {
 
-    abstract fun getInfoLink(type: String): String
     abstract val dialogTitle: String
     abstract val postHighScoreLink: String?
     abstract val highScoreLink: String?
@@ -45,15 +44,11 @@ abstract class QuizActivity : AppCompatActivity() {
     var type = QuizChoiceType.TEXT
     private var choices = mutableListOf<String>()
 
-    abstract fun onCreated()
-
+    abstract fun getInfoLink(type: String): String
+    open fun onCreated() {}
     open fun nextQuestionAction() {}
     open fun previousQuestionAction() {}
     open fun answerChecking() {}
-
-    fun setChoices(vararg s: String) {
-        choices.addAll(s)
-    }
 
     private val client = HttpClient()
     private lateinit var quizQuestions: Array<QuizQuestions>
@@ -139,7 +134,7 @@ abstract class QuizActivity : AppCompatActivity() {
 
         linearLayout.addView(choiceInput)
 
-        val builder = AlertDialog.Builder(this)
+        val builder = MaterialAlertDialogBuilder(this)
         builder.setView(linearLayout)
         builder.setTitle(dialogTitle)
         builder.setMessage(dialogMessage)
@@ -175,18 +170,20 @@ abstract class QuizActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    fun setChoices(vararg s: String) {
+        choices.addAll(s)
+    }
+
     private fun answerCheck() {
         answerChecking()
         val infoList = arrayListOf<String>()
         var count = 0
         for (q in quizQuestions.withIndex()) {
-            Loged.r("${q.value}\n${answerList[q.index]}")
             if (q.value.correctAnswer == answerList[q.index]?.second) {
                 count++
             }
             infoList += "${q.index}) Your Pick: ${answerList[q.index]?.second} | Correct Answer: ${q.value.correctAnswer}"
         }
-        Loged.d("Your score is $count")
 
         val linearLayout = LinearLayout(this)
         linearLayout.orientation = LinearLayout.VERTICAL
@@ -217,7 +214,7 @@ abstract class QuizActivity : AppCompatActivity() {
             linearLayout.addView(userInput)
         }
 
-        val builder = AlertDialog.Builder(this)
+        val builder = MaterialAlertDialogBuilder(this)
         builder.setView(linearLayout)
         builder.setTitle("Score")
         builder.setMessage("You got $count/${quizQuestions.size}")
@@ -226,7 +223,7 @@ abstract class QuizActivity : AppCompatActivity() {
         if (!postHighScoreLink.isNullOrBlank()) {
             builder.setPositiveButton("Submit Score") { _, _ ->
                 GlobalScope.launch {
-                    val s = client.post<String>(postHighScoreLink!!) {
+                    client.post<String>(postHighScoreLink!!) {
                         method = HttpMethod.Post
                         host = ClientHandler.host
                         port = 8080
@@ -237,7 +234,6 @@ abstract class QuizActivity : AppCompatActivity() {
                             "$count/${quizQuestions.size}"
                         ).toJson()
                     }
-                    Loged.i(s)
                     getHighScores()
                 }
                 getInfo()

@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.programmerbox.dragswipe.DragSwipeAdapter
@@ -40,21 +39,10 @@ class ShowActivity : AppCompatActivity() {
         val dividerItemDecoration =
             DividerItemDecoration(rv.context, (rv.layoutManager as LinearLayoutManager).orientation)
         rv.addItemDecoration(dividerItemDecoration)
-
-        /*rv.addOnScrollListener(CustomScrollListener {
-            runOnUiThread {
-                when (it) {
-                    ScrollDirection.UP -> randomShow.extend()
-                    ScrollDirection.DOWN -> randomShow.shrink()
-                    else -> {
-
-                    }
-                }
-            }
-        })*/
+        rv.setItemViewCacheSize(50)
 
         toTop.setOnClickListener {
-            rv.smoothScrollAction(0) {  }
+            rv.smoothScrollAction(0) { }
         }
 
         GlobalScope.launch {
@@ -132,7 +120,6 @@ class ShowActivity : AppCompatActivity() {
             )
         }
     }
-
 }
 
 data class EpisodeInfo(
@@ -143,32 +130,3 @@ data class EpisodeInfo(
 )
 
 data class ShowInfo(val name: String, val url: String)
-
-enum class ScrollDirection {
-    UP, DOWN, LEFT, RIGHT, NONE
-}
-
-class CustomScrollListener(val action: (ScrollDirection) -> Unit) : RecyclerView.OnScrollListener() {
-
-    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-        /*when (newState) {
-            RecyclerView.SCROLL_STATE_IDLE -> println("The RecyclerView is not scrolling")
-            RecyclerView.SCROLL_STATE_DRAGGING -> println("Scrolling now")
-            RecyclerView.SCROLL_STATE_SETTLING -> println("Scroll Settling")
-        }*/
-    }
-
-    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-        when {
-            dx > 0 -> action(ScrollDirection.RIGHT)
-            dx < 0 -> action(ScrollDirection.LEFT)
-            else -> action(ScrollDirection.NONE)
-        }
-
-        when {
-            dy > 0 -> action(ScrollDirection.DOWN)
-            dy < 0 -> action(ScrollDirection.UP)
-            else -> action(ScrollDirection.NONE)
-        }
-    }
-}

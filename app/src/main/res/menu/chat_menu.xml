@@ -22,6 +22,11 @@
         android:title="Music" />
 
     <item
+        android:id="@+id/showGame"
+        android:icon="@drawable/ic_launcher_background"
+        android:title="Show Quiz" />
+
+    <item
         android:id="@+id/boldText"
         android:icon="@drawable/ic_launcher_background"
         android:title="Bold" />
